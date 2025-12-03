@@ -28,6 +28,10 @@ services:
 volumes:
   sample-user:
     name: criu-jupyterlab-sample-user
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.network_number.0/24
 
 networks:
   sample-user:
