@@ -18,6 +18,7 @@ COMPOSE_FILE_TPL=users/${USERNAME_TPL}.yml
 ENV_FILE_TPL=users/${USERNAME_TPL}.env
 
 PORT_SEQ_FILE=users/port_seq.txt
+NETWORK_NUMBER_SEQ_FILE=users/network_number.txt
 
 
 #####################################################################################################
@@ -94,12 +95,23 @@ else
   read -p "Quarto preview Port: " PORT_QUARTO
 fi
 
+# Auto-increment network number
+if [ -f "$NETWORK_NUMBER_SEQ_FILE" ]
+then
+  NETWORK_NUMBER=$(( $(cat "$NETWORK_NUMBER_SEQ_FILE") + 1 ))
+else
+  echo "The file with the last network number generated could not be found ($NETWORK_NUMBER_SEQ_FILE)."
+  echo "Please provide a network number for this user."
+  read -p "Network Number: " NETWORK_NUMBER
+fi
+
 cp "$COMPOSE_FILE_TPL" "$COMPOSE_FILE"
 sed -e "s/$USERNAME_TPL/$USERNAME/" \
     -e "s/NAME/${NAME}/" \
     -e "s/EMAIL/${EMAIL}/" \
     -e "s/PORT_QUARTO/${PORT_QUARTO}/" \
     -e "s/PORT/${PORT}/" \
+    -e "s/NETWORK_NUMBER/${NETWORK_NUMBER}/" \
     -i "$COMPOSE_FILE"
 
 
@@ -110,6 +122,7 @@ docker compose -f "$COMPOSE_FILE" up -d $USERNAME
 
 # Save last port number generated
 echo $PORT > "$PORT_SEQ_FILE"
+echo $NETWORK_NUMBER > "$NETWORK_NUMBER_SEQ_FILE"
 
 # Generate unique URL to access the notebook
 HOSTNAME=$(hostname)
